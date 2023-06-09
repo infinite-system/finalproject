@@ -12,7 +12,11 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@vuelidate/core": "^2.0.2",
+    "@vuelidate/validators": "^2.0.2",
+    "@vueuse/core": "^10.1.2",
     "inversify": "^6.0.1",
+    "isarrow": "^1.0.0",
     "mobx": "^6.9.0",
     "mobx-vue-lite": "^0.3.1",
     "pinia": "^2.0.36",
@@ -20,6 +24,7 @@
     "tree-model": "^1.0.7",
     "vue": "^3.3.2",
     "vue-router": "^4.2.0",
+    "vue-use": "^0.2.0",
     "wait-for-expect": "^3.0.2"
   },
   "devDependencies": {
@@ -39,6 +44,7 @@
     "typescript": "~5.0.4",
     "vite": "^4.3.5",
     "vitest": "^0.31.0",
+    "vue-dd": "^1.5.0",
     "vue-tsc": "^1.6.4"
   }
 }

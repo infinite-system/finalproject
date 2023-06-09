@@ -6,11 +6,10 @@ import { UserModel } from '../Authentication/UserModel'
 
 @injectable()
 export class Router {
-  @inject(RouterRepository) routerRepository
 
-  @inject(UserModel) userModel
-
-  @inject(MessagesRepository) messagesRepository
+  @inject(RouterRepository) routerRepository: RouterRepository
+  @inject(UserModel) userModel: UserModel
+  @inject(MessagesRepository) messagesRepository: MessagesRepository
 
   get currentRoute() {
     return this.routerRepository.currentRoute
@@ -23,37 +22,55 @@ export class Router {
     })
   }
 
-  updateCurrentRoute = async (newRouteId, params, query) => {
+   updateCurrentRoute = async (newRouteId, params, query)  => {
+
     const oldRoute = this.routerRepository.findRoute(this.currentRoute.routeId)
     const newRoute = this.routerRepository.findRoute(newRouteId)
+
     const hasToken = !!this.userModel.token
+
     const routeChanged = oldRoute.routeId !== newRoute.routeId
+
     const protectedOrUnauthenticatedRoute =
       (newRoute.routeDef.isSecure && hasToken === false) || newRoute.routeDef.path === '*'
     const publicOrAuthenticatedRoute =
       (newRoute.routeDef.isSecure && hasToken === true) || newRoute.routeDef.isSecure === false
 
+     console.log('routeChanged', routeChanged,
+       'protectedOrUnauthenticatedRoute', protectedOrUnauthenticatedRoute,
+       'publicOrAuthenticatedRoute', publicOrAuthenticatedRoute,
+       'newRoute', newRoute
+     )
     if (routeChanged) {
       this.routerRepository.onRouteChanged()
 
       if (protectedOrUnauthenticatedRoute) {
-        this.routerRepository.goToId('loginLink')
+
+        setTimeout(() =>
+          this.routerRepository.goToId('loginLink')
+          , 0)
+        return false
+
       } else if (publicOrAuthenticatedRoute) {
+
         if (oldRoute.onLeave) oldRoute.onLeave()
         if (newRoute.onEnter) newRoute.onEnter()
+
         this.routerRepository.currentRoute.routeId = newRoute.routeId
         this.routerRepository.currentRoute.routeDef = newRoute.routeDef
         this.routerRepository.currentRoute.params = params
         this.routerRepository.currentRoute.query = query
+        return true
       }
     }
+    return true
   }
 
-  registerRoutes = (onRouteChange) => {
+  registerRoutes (onRouteChange) {
     this.routerRepository.registerRoutes(this.updateCurrentRoute, onRouteChange)
   }
 
-  goToId = async (routeId, params, query) => {
-    this.routerRepository.goToId(routeId)
+  async goToId (routeId, params, query) {
+    return this.routerRepository.goToId(routeId)
   }
 }

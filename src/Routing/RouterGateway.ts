@@ -1,27 +1,38 @@
 import { injectable } from 'inversify'
-import Navigo from 'navigo'
+import { createRouter, createWebHistory } from 'vue-router'
+import type { Router } from 'vue-router'
 
 @injectable()
 export class RouterGateway {
-  navigo
 
-  registerRoutes = async (routeConfig) => {
-    if (this.navigo) return new Promise((resolve) => setTimeout(resolve, 0))
-    this.navigo = new Navigo('/')
-    const self = this.navigo
-    self
-      .on(routeConfig)
-      .notFound(() => {})
-      .resolve()
+  vueRouter: Router
+
+  registerRoutes = async (routeConfig, updateCurrentRoute) => {
+
+    if (this.vueRouter) {
+      return new Promise((resolve) => setTimeout(resolve, 0))
+    }
+
+    this.vueRouter = createRouter({
+      history: createWebHistory(),
+      routes: routeConfig
+    })
+
+    this.vueRouter.beforeEach(async to => {
+      return await updateCurrentRoute(to.name)
+    })
+
+    console.log('vueRouter', this.vueRouter)
 
     return new Promise((resolve) => setTimeout(resolve, 0))
   }
 
   unload = () => {
-    this.navigo.destroy()
+    this.vueRouter = null
   }
 
-  goToId = async (name, queryString) => {
-    this.navigo.navigateByName(name, queryString)
+  goToId = async (name, queryString = {}) => {
+    console.log('name', name)
+    return await this.vueRouter.push({ name: name, query: queryString })
   }
 }

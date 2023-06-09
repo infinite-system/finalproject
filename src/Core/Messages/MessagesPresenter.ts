@@ -4,27 +4,30 @@ import { MessagesRepository } from './MessagesRepository'
 
 @injectable()
 export abstract class MessagesPresenter {
-  @inject(MessagesRepository)
-  messagesRepository
+
+  @inject(MessagesRepository) messagesRepository: MessagesRepository
 
   showValidationWarning = null
 
-  abstract reset(): void
-  get messages() {
-    return this.messagesRepository.appMessages
+  messagesObservables = {
+    showValidationWarning: observable,
+    messages: computed,
+    unpackRepositoryPmToVm: action,
   }
 
   constructor() {
-    makeObservable(this, {
-      showValidationWarning: observable,
-      messages: computed,
-      unpackRepositoryPmToVm: action,
-    })
+    makeObservable(this, this.messagesObservables)
   }
 
   init = () => {
     this.showValidationWarning = false
     this.reset()
+  }
+
+  abstract reset(): void
+
+  get messages() {
+    return this.messagesRepository.appMessages
   }
 
   unpackRepositoryPmToVm = (pm, userMessage) => {

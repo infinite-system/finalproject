@@ -3,13 +3,12 @@ import { computed, makeObservable } from 'mobx'
 import { MessagesRepository } from './Core/Messages/MessagesRepository'
 import { Router } from './Routing/Router'
 
+
 @injectable()
 export class AppPresenter {
-  @inject(Router)
-  router
 
-  @inject(MessagesRepository)
-  messagesRepository
+  @inject(Router) router: Router
+  @inject(MessagesRepository) messagesRepository: MessagesRepository
 
   get currentRoute() {
     return this.router.currentRoute
@@ -21,7 +20,7 @@ export class AppPresenter {
     })
   }
 
-  load = (onRouteChange) => {
+  load = (onRouteChange = () => {}) => {
     const onRouteChangeWrapper = () => {
       this.messagesRepository.appMessages = []
       onRouteChange()

@@ -1,25 +1,37 @@
 import { inject, injectable } from 'inversify'
-import { action, makeObservable } from 'mobx'
+import { action, makeObservable, observable, reaction } from 'mobx'
 import { Types } from '../Core/Types'
 import { Router } from '../Routing/Router'
 import { UserModel } from '../Authentication/UserModel'
 import { MessagePacking } from '../Core/Messages/MessagePacking'
+import { RouterGateway } from "@/Routing/RouterGateway.js";
+import { useMobX } from "@/Composables/useMobX.js";
 
 @injectable()
 export class AuthenticationRepository {
-  @inject(Router)
-  router
 
-  @inject(Types.IDataGateway)
-  dataGateway
+  @inject(Router) router: Router
 
-  @inject(UserModel)
-  userModel
+  @inject(Types.IDataGateway) dataGateway: RouterGateway
+
+  @inject(UserModel) userModel: UserModel
+
+  testVariable = []
+  testVariable2 = {
+    awesome: {
+      super: 'yes'
+    }
+  }
+
+  observables = {
+    login: action,
+    testVariable: observable,
+    testVariable2: observable
+  }
 
   constructor() {
-    makeObservable(this, {
-      login: action,
-    })
+    makeObservable(this, this.observables)
+    // useMobX(this, this.observables)
   }
 
   login = async (email, password) => {
