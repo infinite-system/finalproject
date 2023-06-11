@@ -30,25 +30,27 @@ export class LoginRegisterPresenter extends MessagesPresenter {
     register: action,
     logOut: action,
     setAuthRepoTest: action,
+    awesome: computed,
     viewTest: computed,
     viewTest2: computed,
+    _awesome: observable
   }
 
-  getVm () {
+  get vm () {
 
     const observables = {
       ...this.observables,
       ...this.messagesObservables
     }
 
-    return useMobX(this, observables, { attach: 'vm' })
+    return useMobX(this, observables, { attach: '__vm' })
   }
 
   constructor () {
     super()
     makeObservable(this, this.observables)
     this.init()
-    this.getVm()
+    // this.getVm()
   }
 
   //
@@ -76,7 +78,17 @@ export class LoginRegisterPresenter extends MessagesPresenter {
     )
   }
 
-  setTest3 () {
+  _awesome = 0
+
+  get awesome() {
+    return this._awesome
+  }
+
+  set awesome (value){
+    this._awesome = value
+  }
+
+  setAuthRepoArrayKey () {
     console.log('this.authenticationRepository.testVariable[0]', this.authenticationRepository.testVariable[0])
 
     this.authenticationRepository.testVariable[0].sub.test = 'aaaaaaaaaaa';
@@ -85,7 +97,7 @@ export class LoginRegisterPresenter extends MessagesPresenter {
     notify(this.authenticationRepository, 'testVariable', 0)
   }
 
-  setTest4 () {
+  setInjectableObservableSubProperties () {
     console.log('this.authenticationRepository.testVariable2', this.authenticationRepository.testVariable2)
     this.authenticationRepository.testVariable2.awesome.super = 'test'
     this.authenticationRepository.testVariable2.awesome.duper = 'test'
@@ -93,16 +105,14 @@ export class LoginRegisterPresenter extends MessagesPresenter {
     notify(this.authenticationRepository, 'testVariable2')
   }
 
-  setTest6 () {
-
+  setObjectSubProperty () {
     this.password.test.rest = 2
 
+    notify(this, 'password')
   }
 
-  setTest8 () {
-
-    this.setViewTest([{test1:'aloha', sub:{test:'mmmmmm'}}])
-
+  setViewTestViaMethod () {
+    this.viewTest = [{test1:'aloha', sub:{test:'mmmmmm'}}]
   }
 
   reset () {
@@ -129,7 +139,7 @@ export class LoginRegisterPresenter extends MessagesPresenter {
     this.unpackRepositoryPmToVm(registerPm, 'User registered')
   }
 
-  logOut = async () => {
+  async logOut () {
     this.authenticationRepository.logOut()
     this.router.goToId('loginLink')
   }

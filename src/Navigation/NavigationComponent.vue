@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Observer } from 'mobx-vue-lite'
 // import { withInjection } from '../Core/Providers/Injection'
 import LogoutComponent from '../Authentication/LogoutComponent.vue'

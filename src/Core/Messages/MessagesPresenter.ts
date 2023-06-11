@@ -1,6 +1,7 @@
 import { inject, injectable } from 'inversify'
 import { action, computed, makeObservable, observable } from 'mobx'
 import { MessagesRepository } from './MessagesRepository'
+import {useMobX} from "@/Composables/useMobX";
 
 @injectable()
 export abstract class MessagesPresenter {
@@ -19,7 +20,7 @@ export abstract class MessagesPresenter {
     makeObservable(this, this.messagesObservables)
   }
 
-  init = () => {
+  init () {
     this.showValidationWarning = false
     this.reset()
   }
@@ -30,8 +31,13 @@ export abstract class MessagesPresenter {
     return this.messagesRepository.appMessages
   }
 
-  unpackRepositoryPmToVm = (pm, userMessage) => {
+  unpackRepositoryPmToVm (pm, userMessage) {
     this.showValidationWarning = !pm.success
     this.messagesRepository.appMessages = pm.success ? [userMessage] : [pm.serverMessage]
   }
+
+  get vm () {
+    return useMobX(this, this.messagesObservables, { attach: '__vm' })
+  }
+
 }

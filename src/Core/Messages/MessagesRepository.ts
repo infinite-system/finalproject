@@ -12,7 +12,7 @@ export class MessagesRepository {
     this.reset()
   }
 
-  reset = () => {
+  reset () {
     this.appMessages = []
   }
 }

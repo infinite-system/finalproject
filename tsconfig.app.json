@@ -4,9 +4,16 @@
   "exclude": ["src/**/__tests__/*"],
   "compilerOptions": {
 
-    /* enable decorators */
+    /* enable decorators & inversify*/
+    "target": "ES2016",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+//    "lib": ["es6"],
+//    "types": ["reflect-metadata"],
+//    "module": "commonjs",
+//    "moduleResolution": "node",
+
     "jsx": "preserve",
 
     "composite": true,

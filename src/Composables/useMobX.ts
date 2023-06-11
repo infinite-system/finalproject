@@ -1,4 +1,4 @@
-import { markRaw, reactive, watch, UnwrapNestedRefs } from "vue";
+import {markRaw, reactive, watch, UnwrapNestedRefs, toRaw} from "vue";
 import { tryOnScopeDispose } from '@vueuse/core'
 
 import { observable, reaction, makeObservable } from 'mobx'
@@ -133,7 +133,7 @@ export function useMobX (obj, observables, options = {}) {
   const opts = {
     ...{
       raw: false, // true for all observables or [] of items that must be markRaw()
-      attach: '_vm', // property name to attach to obj
+      attach: '__vm', // property name to attach to obj
       annotations: {}
     },
     ...options
@@ -179,7 +179,7 @@ export function useMobX (obj, observables, options = {}) {
 
   // Create shadow of all the props that are not observables
   allProps.forEach(prop => {
-    if (typeof observables[prop] === 'undefined') {
+    if (typeof observables[prop] === 'undefined' && prop !== opts.attach && prop !== 'vm') {
       state[prop] = typeof obj[prop] === 'object'
         ? markRaw(obj[prop])
         : (typeof obj[prop] === 'function'
@@ -209,7 +209,7 @@ export function useMobX (obj, observables, options = {}) {
           }
 
           // Set property of shadow state
-          obj[observable] = newValue
+          obj[observable] = toRaw(newValue)
 
           if (observable in createReaction) {
             reactionDisposer[observable] = createReaction[observable]()

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Observer } from 'mobx-vue-lite'
 import NavigationComponent from '../Navigation/NavigationComponent.vue'
 import { container } from '../AppIOC'

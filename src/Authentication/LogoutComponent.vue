@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Observer } from 'mobx-vue-lite'
 import { LoginRegisterPresenter } from '../Authentication/LoginRegisterPresenter'
 import { container } from '../AppIOC'

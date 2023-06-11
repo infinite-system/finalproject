@@ -1,22 +1,21 @@
-<script setup>
+<script setup lang="ts">
 import { Observer } from 'mobx-vue-lite'
 import { MessagesPresenter } from './MessagesPresenter'
-{/*import { withInjection } from '../Providers/Injection'*/}
-{/*import { useValidation } from '../Providers/Validation'*/}
+// { import { withInjection } from '../Providers/Injection' }
+// { import { useValidation } from '../Providers/Validation' }
 // const [uiMessages] = useValidation()
 
 import { container } from '@/AppIOC.ts'
 
-const presenter = container.get(MessagesPresenter);
+const vm = container.get(MessagesPresenter).vm;
 </script>
 <template>
-  <Observer>
-    <div v-for="message in presenter.messages" :style="{ backgroundColor: 'red'}">
-    --
-    {{message}}
+
+    <div v-for="message in vm.messages" :style="{ backgroundColor: 'red'}">
+      - {{ message }}
     </div>
-  </Observer>
-<!--      {props.presenter.messag=es &&-->
+
+<!--      {props.presenter.messages &&-->
 <!--        props.presenter.messages.map((item, i) => {-->
 <!--          return (-->
 <!--            <div style={{ backgroundColor: 'red' }} key={i}>-->

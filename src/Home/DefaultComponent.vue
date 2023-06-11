@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Observer } from 'mobx-vue-lite'
 </script>
 <template>

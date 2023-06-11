@@ -13,5 +13,12 @@ module.exports = {
     "ecmaFeatures": {
       "jsx": true,
     }
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "jasmine": true,
+    "jest": true,
+    "es6": true
   }
 }

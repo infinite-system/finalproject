@@ -8,13 +8,13 @@ export class RouterRepository {
 
   @inject(Types.IRouterGateway) routerGateway: RouterGateway
 
-  currentRoute = { routeId: 'default' }
+  currentRoute = { routeId: null }
 
   onRouteChanged = null
 
   routes = [
     {
-      routeId: 'home',
+      routeId: null,
       routeDef: {
         path: '',
         isSecure: true,

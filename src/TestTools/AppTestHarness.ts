@@ -1,3 +1,5 @@
+import 'reflect-metadata'
+import { vi } from 'vitest'
 import { Types } from '../Core/Types'
 import { BaseIOC } from '../BaseIOC'
 import { FakeRouterGateway } from '../Routing/FakeRouterGateway'
@@ -36,7 +38,7 @@ export class AppTestHarness {
     this.routerRepository = this.container.get(RouterRepository)
     this.routerGateway = this.container.get(Types.IRouterGateway)
 
-    this.routerGateway.goToId = jest.fn().mockImplementation((routeId) => {
+    this.routerGateway.goToId = vi.fn().mockImplementation((routeId) => {
       // pivot
       this.router.updateCurrentRoute(routeId, null, null)
     })
@@ -49,11 +51,14 @@ export class AppTestHarness {
 
   // 3. login or register to the app
   setupLogin = async (loginStub, type) => {
+
     this.dataGateway = this.container.get(Types.IDataGateway)
-    this.dataGateway.get = jest.fn().mockImplementation((path) => {
+
+    this.dataGateway.get = vi.fn().mockImplementation((path) => {
       return Promise.resolve(SingleBooksResultStub())
     })
-    this.dataGateway.post = jest.fn().mockImplementation((path) => {
+
+    this.dataGateway.post = vi.fn().mockImplementation((path) => {
       return Promise.resolve(loginStub())
     })
 

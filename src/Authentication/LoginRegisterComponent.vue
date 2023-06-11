@@ -8,28 +8,23 @@ import { container } from '../AppIOC'
 import { reactive, shallowRef, ref, triggerRef, markRaw, getCurrentInstance } from "vue";
 import { AuthenticationRepository } from "@/Authentication/AuthenticationRepository.js";
 
-import isArrow from 'isarrow'
+
 function formValid () {
   return true
 }
-console.log(isArrow("hello world")); // > false
-console.log(isArrow(function() {})); // > false
-console.log(isArrow(async function() {})); // > false
-console.log(isArrow(class {})); // > false
-console.log(isArrow(() => {})); // > true
-console.log(isArrow(async () => {})); // > true
-console.log(isArrow(123)); // > false
-console.log(isArrow({})); // > false
-console.log(isArrow([])); // > false
-console.log(isArrow(Math.min)); // > false
+
 const presenter: LoginRegisterPresenter = container.get(LoginRegisterPresenter);
-const vm: LoginRegisterPresenter = presenter.getVm()
+const vm: LoginRegisterPresenter = presenter.vm
 console.log('presenter', presenter)
 console.log('vm', vm)
 // const vm: LoginRegisterPresenter = presenter.getVm();
 // console.log('vm', vm)
 const auth = container.get(AuthenticationRepository);
-
+// let i = 0
+// setInterval(() => {
+//   vm.awesome = i++
+// }, 500)
+// vm.awesome = 'test'
 </script>
 <template>
 
@@ -37,7 +32,7 @@ const auth = container.get(AuthenticationRepository);
   <!--  <vue-dd name="presenter" v-model="presenter" />-->
   <!--  <vue-dd name="state" v-model="state" />-->
   <!--  <vue-dd name="refObj" v-model="refObj" />-->
-<!--  <vue-dd name="presenter" :get-all-properties="true" v-model="presenter" />-->
+  <vue-dd name="presenter" :get-all-properties="true" v-model="presenter" />
   <vue-dd name="vm" :get-all-properties="true" v-model="vm" />
 
   <div class="container">
@@ -70,7 +65,7 @@ const auth = container.get(AuthenticationRepository);
 <!--      {{ presenter.password.test.rest}}-->
 <!--    </Observer2>-->
 
-{{vm.password.test.rest}}
+<!--{{vm.password.test.rest}}-->
 <!--    <Observer>-->
 <!--      <div v-for="element in presenter.viewTest">-->
 <!--        <input type="text" v-model="element.test1" /> {{ element.sub.test }}-->
@@ -80,12 +75,12 @@ const auth = container.get(AuthenticationRepository);
     <button @click="() => { vm.viewTest = [{ test1: 'hola', sub:{test:11} }] }">Set value</button>
 
     <button @click="() => { vm.setAuthRepoTest() }">Set value push</button>
-    <button @click="() => { vm.setTest3() }">Set value 3</button>
-    <button @click="() => { vm.setTest4() }">Set value 4</button>
+    <button @click="() => { vm.setAuthRepoArrayKey() }">Set array key & notify</button> <br />
+    <button @click="() => { vm.setInjectableObservableSubProperties() }">Set injectable authenticationRepository object properties</button>
     <button @click="() => { vm.viewTest[0].sub.test = 1 }">Set value 5</button>
-    <button @click="() => { vm.setTest6() }">Set value 6</button>
-    <button @click="() => { presenter.email = 'eka@eka.ca' }">Set value 7</button>
-    <button @click="() => { vm.setTest8() }">Set value 8</button>
+    <button @click="() => { vm.setObjectSubProperty() }">Set password object sub property</button>
+    <button @click="() => { presenter.email = 'eka@eka.ca' }">Set presenter email</button>
+    <button @click="() => { vm.setViewTestViaMethod() }">Set viewTest via a method</button>
 
     <br />
     <br />

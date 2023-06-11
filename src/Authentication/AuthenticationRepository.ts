@@ -34,7 +34,7 @@ export class AuthenticationRepository {
     // useMobX(this, this.observables)
   }
 
-  login = async (email, password) => {
+  async login (email, password) {
     const loginDto = await this.dataGateway.post('/login', {
       email,
       password,
@@ -48,7 +48,7 @@ export class AuthenticationRepository {
     return MessagePacking.unpackServerDtoToPm(loginDto)
   }
 
-  register = async (email, password) => {
+  async register (email, password) {
     const registerDto = await this.dataGateway.post('/register', {
       email,
       password,
@@ -57,7 +57,7 @@ export class AuthenticationRepository {
     return MessagePacking.unpackServerDtoToPm(registerDto)
   }
 
-  logOut = async () => {
+  async logOut () {
     this.userModel.email = ''
     this.userModel.token = ''
   }

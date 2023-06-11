@@ -46,9 +46,9 @@ export class Router {
 
       if (protectedOrUnauthenticatedRoute) {
 
-        setTimeout(() =>
+        // setTimeout(() =>
           this.routerRepository.goToId('loginLink')
-          , 0)
+          // , 0)
         return false
 
       } else if (publicOrAuthenticatedRoute) {
