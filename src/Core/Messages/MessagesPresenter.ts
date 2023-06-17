@@ -13,6 +13,7 @@ export abstract class MessagesPresenter {
   messagesObservables = {
     showValidationWarning: observable,
     messages: computed,
+    clientMessages: computed,
     unpackRepositoryPmToVm: action,
   }
 
@@ -31,13 +32,16 @@ export abstract class MessagesPresenter {
     return this.messagesRepository.appMessages
   }
 
+  get clientMessages() {
+    return this.messagesRepository.clientMessages
+  }
+
   unpackRepositoryPmToVm (pm, userMessage) {
     this.showValidationWarning = !pm.success
     this.messagesRepository.appMessages = pm.success ? [userMessage] : [pm.serverMessage]
   }
 
   get vm () {
-    return useMobX(this, this.messagesObservables, { attach: '__vm' })
+    return useMobX(this, this.messagesObservables)
   }
-
 }

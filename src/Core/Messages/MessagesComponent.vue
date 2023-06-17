@@ -15,6 +15,10 @@ const vm = container.get(MessagesPresenter).vm;
       - {{ message }}
     </div>
 
+    <div v-for="message in vm.clientMessages" :style="{ backgroundColor: 'orange'}">
+      - {{ message }}
+    </div>
+
 <!--      {props.presenter.messages &&-->
 <!--        props.presenter.messages.map((item, i) => {-->
 <!--          return (-->

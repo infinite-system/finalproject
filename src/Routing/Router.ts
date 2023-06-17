@@ -25,14 +25,16 @@ export class Router {
    updateCurrentRoute = async (newRouteId, params, query)  => {
 
     const oldRoute = this.routerRepository.findRoute(this.currentRoute.routeId)
-    const newRoute = this.routerRepository.findRoute(newRouteId)
+    const newRoute = this.routerRepository.getNewRoute(newRouteId)
 
     const hasToken = !!this.userModel.token
 
     const routeChanged = oldRoute.routeId !== newRoute.routeId
 
+     console.log('newRouteId', newRouteId, 'oldRoute.routeId', oldRoute.routeId, 'newRoute.routeId', newRoute.routeId)
+
     const protectedOrUnauthenticatedRoute =
-      (newRoute.routeDef.isSecure && hasToken === false) || newRoute.routeDef.path === '*'
+      (newRoute.routeDef.isSecure && hasToken === false) || newRoute.routeDef.routeId === '*'
     const publicOrAuthenticatedRoute =
       (newRoute.routeDef.isSecure && hasToken === true) || newRoute.routeDef.isSecure === false
 

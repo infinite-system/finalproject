@@ -6,24 +6,22 @@ import { action, computed, makeObservable } from 'mobx'
 
 @injectable()
 export class NavigationRepository {
-  @inject(AuthenticationRepository)
-  authenticationRepository
 
-  @inject(Router)
-  router
+  @inject(AuthenticationRepository) authenticationRepository: AuthenticationRepository
+  @inject(Router) router: Router
 
-  get currentNode() {
+  get currentNode () {
     return this.getTree().all((node) => node.model.id === this.router.currentRoute.routeId)[0]
   }
 
-  constructor() {
+  constructor () {
     makeObservable(this, {
       currentNode: computed,
       back: action,
     })
   }
 
-  getTree() {
+  getTree () {
     const tree = new TreeModel()
 
     const root = tree.parse({
@@ -36,7 +34,7 @@ export class NavigationRepository {
     return root
   }
 
-  back = () => {
+  back () {
     const currentNode = this.currentNode
     this.router.goToId(currentNode.parent.model.id)
   }

@@ -5,11 +5,9 @@ import { RouterRepository } from '../Routing/RouterRepository'
 
 @injectable()
 export class NavigationPresenter {
-  @inject(NavigationRepository)
-  navigationRepository
 
-  @inject(RouterRepository)
-  routerRepository
+  @inject(NavigationRepository) navigationRepository: NavigationRepository
+  @inject(RouterRepository) routerRepository: RouterRepository
 
   get viewModel() {
     const vm = {
@@ -45,11 +43,11 @@ export class NavigationPresenter {
     })
   }
 
-  visibleName = (node) => {
+  visibleName (node) {
     return node.model.text + ' > ' + node.model.id
   }
 
-  back = () => {
+  back () {
     this.navigationRepository.back()
   }
 }

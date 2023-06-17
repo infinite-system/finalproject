@@ -5,13 +5,8 @@ import { LoginRegisterPresenter } from './LoginRegisterPresenter'
 import MessagesComponent from '../Core/Messages/MessagesComponent.vue'
 // import { useValidation } from '../Core/Providers/Validation'
 import { container } from '../AppIOC'
-import { reactive, shallowRef, ref, triggerRef, markRaw, getCurrentInstance } from "vue";
 import { AuthenticationRepository } from "@/Authentication/AuthenticationRepository.js";
 
-
-function formValid () {
-  return true
-}
 
 const presenter: LoginRegisterPresenter = container.get(LoginRegisterPresenter);
 const vm: LoginRegisterPresenter = presenter.vm
@@ -28,10 +23,6 @@ const auth = container.get(AuthenticationRepository);
 </script>
 <template>
 
-  <!--  <vue-dd name="p" v-model="p" />-->
-  <!--  <vue-dd name="presenter" v-model="presenter" />-->
-  <!--  <vue-dd name="state" v-model="state" />-->
-  <!--  <vue-dd name="refObj" v-model="refObj" />-->
   <vue-dd name="presenter" :get-all-properties="true" v-model="presenter" />
   <vue-dd name="vm" :get-all-properties="true" v-model="vm" />
 
@@ -125,7 +116,7 @@ const auth = container.get(AuthenticationRepository);
           class="login"
           @submit.prevent="(event) => {
           // event.preventDefault()
-          if (formValid()) {
+          if (vm.formValid()) {
             if (vm.option === 'login') vm.login()
             if (vm.option === 'register') vm.register()
           }
@@ -137,10 +128,8 @@ const auth = container.get(AuthenticationRepository);
               v-model="vm.email"
               placeholder="Email"
             />
-            <!--              @input="(event) => presenter.email = event.target.value"-->
           </div>
           <div class="w3-col s4 w3-center">
-
             <input
               type="text"
               v-model="vm.password"

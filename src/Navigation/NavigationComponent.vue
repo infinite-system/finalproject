@@ -26,6 +26,7 @@ const router = container.get(Router)
         {{ menuItem.visibleName }}
       </div>
 
+      <router-link to="/">Go Home</router-link>
 
       <div
         v-if="presenter.viewModel.showBack"

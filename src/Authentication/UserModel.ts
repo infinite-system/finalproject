@@ -3,8 +3,8 @@ import { makeObservable, observable } from 'mobx'
 
 @injectable()
 export class UserModel {
-  email = null
 
+  email = null
   token = null
 
   constructor() {

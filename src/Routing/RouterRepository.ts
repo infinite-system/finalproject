@@ -13,41 +13,46 @@ export class RouterRepository {
   onRouteChanged = null
 
   routes = [
-    {
-      routeId: null,
-      routeDef: {
-        path: '',
-        isSecure: true,
-        component: () => import('@/AppComponent.vue'),
-        children: [
-          {
-            routeId: 'default',
-            routeDef: {
-              path: '/',
-              isSecure: true,
-              component: () => import('@/Home/HomeComponent.vue'),
-            },
-          },
-          {
-            routeId: 'loginLink',
-            routeDef: {
-              path: '/app/login',
-              isSecure: false,
-              component: () => import('@/Authentication/LoginRegisterComponent.vue'),
-            }
-          },
-          {
-            routeId: 'homeLink',
-            routeDef: {
-              path: '/app/home',
-              isSecure: true,
-              component: () => import('@/Home/HomeComponent.vue'),
-            }
-          },
-        ]
+      {
+        routeId: 'root',
+        routeDef: {
+          path: '/',
+          isSecure: true,
+          component: () => import('@/Home/HomeComponent.vue'),
+        }
       },
-      onEnter: () => {}
-    },
+      {
+        routeId: 'loginLink',
+        routeDef: {
+          path: '/app/login',
+          isSecure: false,
+          component: () => import('@/Authentication/LoginRegisterComponent.vue'),
+        }
+      },
+      {
+        routeId: 'homeLink',
+        routeDef: {
+          path: '/app/home',
+          isSecure: true,
+          component: () => import('@/Home/HomeComponent.vue'),
+        }
+      },
+      {
+        routeId: 'authorPolicyLink',
+        routeDef: {
+          path: '/app/author-policy',
+          isSecure: false,
+          component: () => import('@/Home/HomeComponent.vue'),
+        }
+      },
+      {
+        routeId: '*',
+        routeDef: {
+          path: '/:catchAll(.*)*',
+          isSecure: true,
+          component: () => import('@/Routing/NotFoundRoute.vue')
+        }
+      },
   ]
 
   flatRoutes = {}
@@ -94,26 +99,33 @@ export class RouterRepository {
     return routeConfig
   }
 
-  registerRoutes = (updateCurrentRoute, onRouteChanged) => {
+  registerRoutes (updateCurrentRoute, onRouteChanged) {
 
     this.onRouteChanged = onRouteChanged
 
     this.flatRoutes = this.flattenRoutes(this.routes)
-    console.log('this.flatRoutes', this.flatRoutes)
+    // console.log('this.flatRoutes', this.flatRoutes)
 
     const routeConfig = this.configureRoutes(this.routes)
-    console.log('routeConfig', routeConfig)
+    // console.log('routeConfig', routeConfig)
 
     this.routerGateway.registerRoutes(routeConfig, updateCurrentRoute)
   }
 
-  findRoute = (routeId) => {
+  findRoute (routeId) {
     return routeId in this.flatRoutes
       ? this.flatRoutes[routeId]
       : { routeId: 'loadingSpinner', routeDef: { path: '' } }
   }
 
-  goToId = async (routeId, params, query) => {
+
+  getNewRoute(newRouteId){
+    return newRouteId in this.flatRoutes
+      ? this.flatRoutes[newRouteId]
+      : this.routes[this.routes.length-1]
+  }
+
+  async goToId (routeId, params, query) {
     console.log('go to routeId', routeId)
     return this.routerGateway.goToId(routeId)
   }

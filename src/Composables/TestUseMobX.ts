@@ -7,12 +7,10 @@ import { Router } from '../Routing/Router'
 import { useMobX, notify } from '@/Composables/useMobX';
 
 @injectable()
-export class LoginRegisterPresenter extends MessagesPresenter {
+export class TestUseMobX extends MessagesPresenter {
 
   @inject(AuthenticationRepository) authenticationRepository: AuthenticationRepository
-
   @inject(MessagesRepository) messagesRepository: MessagesRepository
-
   @inject(Router) router: Router
 
   email = null
@@ -37,16 +35,6 @@ export class LoginRegisterPresenter extends MessagesPresenter {
     viewTest: computed,
     viewTest2: computed,
     _awesome: observable
-  }
-
-  get vm () {
-
-    const observables = {
-      ...this.observables,
-      ...this.messagesObservables
-    }
-
-    return useMobX(this, observables)
   }
 
   constructor () {
@@ -120,7 +108,7 @@ export class LoginRegisterPresenter extends MessagesPresenter {
 
   reset () {
     this.email = ''
-    this.password = ''
+    // this.password = ''
     this.option = 'login'
   }
 
@@ -158,6 +146,15 @@ export class LoginRegisterPresenter extends MessagesPresenter {
     return clientValidationMessages.length === 0
   }
 
+  get vm () {
+
+    const observables = {
+      ...this.observables,
+      ...this.messagesObservables
+    }
+
+    return useMobX(this, observables)
+  }
 }
 
 // Object.defineProperty(LoginRegisterPresenter.prototype, 'viewTest', { enumerable: true });

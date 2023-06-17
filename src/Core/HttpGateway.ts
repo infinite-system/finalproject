@@ -4,13 +4,11 @@ import { UserModel } from '../Authentication/UserModel'
 
 @injectable()
 export class HttpGateway {
-  @inject(Config)
-  config
+  @inject(Config) config
 
-  @inject(UserModel)
-  userModel
+  @inject(UserModel) userModel
 
-  get = async (path) => {
+  async get (path) {
     const response = await fetch(this.config.apiUrl + path, {
       method: 'GET',
       headers: {
@@ -22,7 +20,7 @@ export class HttpGateway {
     return dto
   }
 
-  post = async (path, requestDto) => {
+  async post (path, requestDto) {
     const response = await fetch(this.config.apiUrl + path, {
       method: 'POST',
       body: JSON.stringify(requestDto),
@@ -35,7 +33,7 @@ export class HttpGateway {
     return dto
   }
 
-  delete = async (path) => {
+  async delete (path) {
     const response = await fetch(this.config.apiUrl + path, {
       method: 'DELETE',
       headers: {

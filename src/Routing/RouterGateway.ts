@@ -7,7 +7,7 @@ export class RouterGateway {
 
   vueRouter: Router
 
-  registerRoutes = async (routeConfig, updateCurrentRoute) => {
+  async registerRoutes (routeConfig, updateCurrentRoute) {
 
     if (this.vueRouter) {
       return new Promise((resolve) => setTimeout(resolve, 0))
@@ -27,12 +27,11 @@ export class RouterGateway {
     return new Promise((resolve) => setTimeout(resolve, 0))
   }
 
-  unload = () => {
+  unload () {
     this.vueRouter = null
   }
 
-  goToId = async (name, queryString = {}) => {
-    console.log('name', name)
+  async goToId (name, queryString = {}) {
     return await this.vueRouter.push({ name: name, query: queryString })
   }
 }

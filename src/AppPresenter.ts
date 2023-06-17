@@ -10,21 +10,23 @@ export class AppPresenter {
   @inject(Router) router: Router
   @inject(MessagesRepository) messagesRepository: MessagesRepository
 
-  get currentRoute() {
+  get currentRoute () {
     return this.router.currentRoute
   }
 
-  constructor() {
+  constructor () {
     makeObservable(this, {
       currentRoute: computed,
     })
   }
 
-  load = (onRouteChange = () => {}) => {
+  load (onRouteChange = () => {}) {
+
     const onRouteChangeWrapper = () => {
       this.messagesRepository.appMessages = []
       onRouteChange()
     }
+
     this.router.registerRoutes(onRouteChangeWrapper)
   }
 }
