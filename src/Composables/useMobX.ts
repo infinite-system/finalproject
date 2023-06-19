@@ -1,8 +1,11 @@
 import { markRaw, reactive, watch, UnwrapNestedRefs, toRaw } from "vue";
 import { tryOnScopeDispose } from '@vueuse/core'
 
-import { observable, reaction, makeObservable } from 'mobx'
+import { observable, reaction, makeObservable, toJS, autorun } from 'mobx'
 import type { AnnotationsMap } from 'mobx'
+import { deepObserve } from "mobx-utils";
+import { get, set } from 'lodash'
+
 
 /**
  * Create a shallow object clone very quickly.
@@ -24,10 +27,8 @@ export function shallowClone (obj) {
  * @param prop
  * @param key
  */
-export function notify (obj, prop, key = null) {
-  return key !== null
-    ? obj[prop][key] = shallowClone(obj[prop][key])
-    : obj[prop] = shallowClone(obj[prop])
+export function notify (obj) {
+  return shallowClone(obj)
 }
 
 /**
@@ -41,14 +42,15 @@ export function fullClone (obj) {
     return obj;
   }
 
-  let cloned = obj instanceof Date ? new Date(obj) : obj.constructor();
+  let cloned = obj instanceof Date ? new Date(obj) : (obj instanceof Array ? [] : {});
 
   if (Array.isArray(obj)) {
     const objLength = obj.length;
     for (let key = 0; key < objLength; key++) {
       cloned[key] = fullClone(obj[key]);
     }
-  } else {
+  }
+  else {
     for (let key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
         obj['__isActiveClone__'] = null;
@@ -106,27 +108,29 @@ function getMagicProps (instance) {
 export function reactiveObservable<TStore extends Record<string, any>> (
   observers: Object<any> = {},
   raw: Array<any> = [],
-  annotations?: AnnotationsMap<TStore, never>,
 ): UnwrapNestedRefs<TStore> {
 
-  const obj = observable(observers, annotations, { autoBind: true })
+  const obj = Object.assign({}, observers)
 
   if (Array.isArray(raw)) {
     raw.forEach(prop => {
       if (typeof obj[prop] === 'object') {
         if (Array.isArray(obj[prop])) {
           obj[prop] = obj[prop].map(el => markRaw(el))
-        } else {
+        }
+        else {
           obj[prop] = markRaw(obj[prop])
         }
       }
     })
-  } else if (raw === true) {
+  }
+  else if (raw === true) {
     for (const prop in observers) {
       if (typeof observers[prop] === 'object') {
         if (Array.isArray(obj[prop])) {
           obj[prop] = obj[prop].map(el => typeof el === 'object' ? markRaw(el) : el)
-        } else {
+        }
+        else {
           obj[prop] = markRaw(obj[prop])
         }
       }
@@ -152,22 +156,74 @@ export function shadowProp (prop): string {
  * @param observables
  * @param options
  */
-export function useMobX (obj, observables, options = {}) {
+export function useMobX<Store extends Record<string, any>> (obj, observables, options = {}): UnwrapNestedRefs<Store | any> {
+
+  function shallowUpdateVue (state, observable, newValue, opts) {
+    // Set property of shadow state.
+
+    // If option opts.raw === true, Vues markRaw() will tag all objects as raw objects
+    // preventing huge reactivity objects from being created (use opts.raw = true)
+    // If option opts.raw is an array of properties, then markRaw()
+    // will be applied only to those object properties
+    if (opts.raw === true || typeof rawMap[observable] !== 'undefined') {
+      // Handle raw
+      if (typeof state[observable] === 'object') {
+        if (Array.isArray(newValue)) {
+          // Handle array
+          state[observable] = newValue.map(el => typeof el === 'object' ? markRaw(fullClone(el)) : fullClone(el))
+        }
+        else {
+          // Handle object
+          state[observable] = markRaw(fullClone(newValue))
+        }
+      }
+      else {
+        // Primitives values are copied by value, no need to markRaw() or clone them
+        state[observable] = newValue
+      }
+    }
+    else {
+      // Full clone the property without marking it raw
+      state[observable] = fullClone(newValue)
+    }
+  }
+
+  function deepUpdateVue(state, observable, change, path) {
+    path = path.replaceAll('/', '.')
+
+    const ref = (path === '' ? state[observable] : get(state[observable], path))
+
+    switch (change.type) {
+      case 'add':
+      case 'update':
+        ref[change.name] = change.newValue
+        break;
+      case 'remove':
+        delete ref[change.name]
+        break;
+      case 'delete':
+        ref[change.name].delete()
+        break;
+      case 'splice':
+        ref.splice(change.index, change.removedCount, ...(change.added.length && change.added))
+        break;
+    }
+  }
 
   // Init options
   const opts = {
     ...{
       raw: false, // true for all observables or [] of items that must be markRaw()
       attach: 'vm', // property name to attach to obj
-      annotations: {}
     },
     ...options
   }
 
+  const shadowAttach = shadowProp(opts.attach)
   // If singleton is already instantiated
   // return state property
-  if (opts.attach && shadowProp(opts.attach) in obj) {
-    return obj[shadowProp(opts.attach)]
+  if (opts.attach && shadowAttach in obj) {
+    return obj[shadowAttach]
   }
 
   // Get all the magic setters and getters from the object
@@ -182,7 +238,7 @@ export function useMobX (obj, observables, options = {}) {
   }
 
   // Setup the base combined MobX observable and Vue reactive state
-  const state = reactiveObservable(observers, opts.raw, opts.annotations)
+  const state = reactiveObservable(observers, opts.raw)
 
   // Create a raw map for fast access
   const rawMap = {}
@@ -204,7 +260,7 @@ export function useMobX (obj, observables, options = {}) {
 
   // Create shadow of all the props that are not observables
   allProps.forEach(prop => {
-    if (typeof observables[prop] === 'undefined' && prop !== opts.attach && prop !== shadowProp(opts.attach)) {
+    if (typeof observables[prop] === 'undefined' && prop !== opts.attach && prop !== shadowAttach) {
       state[prop] = typeof obj[prop] === 'object'
         ? markRaw(obj[prop])
         : (typeof obj[prop] === 'function'
@@ -215,14 +271,14 @@ export function useMobX (obj, observables, options = {}) {
   })
 
   // MobX reactions
-  const createReaction = {}
+  const createMobXObserver = {}
   // MobX reaction disposers
-  const reactionDisposer = {}
+  const mobxDisposer = {}
 
   // Vue watchers
-  const createWatcher = {}
+  const createVueWatcher = {}
   // Vue watch disposers
-  const watcherDisposer = {}
+  const vueDisposer = {}
 
   // Iterate over all the defined observables
   for (let observable in observables) {
@@ -232,15 +288,13 @@ export function useMobX (obj, observables, options = {}) {
       // Create a Vue Watcher to set values on the original MobX observable object
       // Watches the values change in the Vue shadow state and sets
       // them back to the MobX observable
-      createWatcher[observable] = () => {
+      createVueWatcher[observable] = () => {
 
         return watch(() => state[observable], newValue => {
 
-          if (observable in reactionDisposer) {
-            // Dispose the MobX reaction before setting value
-            // to prevent infinite reactive recursion
-            reactionDisposer[observable]()
-          }
+          // Dispose the MobX reaction before setting value
+          // to prevent infinite reactive recursion
+          mobxDisposer[observable]()
 
           // Set the value of the original object property
           // Set to raw object instead of reactive() object
@@ -248,75 +302,113 @@ export function useMobX (obj, observables, options = {}) {
           obj[observable] = toRaw(newValue)
 
           // Recreate MobX reaction and its disposer function after setting a new value
-          if (observable in createReaction) {
-            reactionDisposer[observable] = createReaction[observable]()
-          }
-
+          mobxDisposer[observable] = createMobXObserver[observable]()
         }, { deep: true })
       }
 
-      // Create MobX reaction and store the reaction disposer
-      watcherDisposer[observable] = createWatcher[observable]()
+      // Create Vue watcher and store the watch disposer
+      vueDisposer[observable] = createVueWatcher[observable]()
 
       // Create MobX reactions that will change the Vue shadow state reactive() props
-      createReaction[observable] = () => {
+      createMobXObserver[observable] = () => {
 
-        return reaction(() => obj[observable], newValue => {
+        const isComputedGetter = typeof magicProps.get[observable] !== 'undefined'
 
-          // Dispose the Vue watcher before setting a value.
-          // This is to prevent infinite recursion
-          if (observable in watcherDisposer) {
-            watcherDisposer[observable]()
+        if (isComputedGetter) {
+          // Handle computed getters
+          // Computed getters should be updated shallowly
+          const computedHandler = newValue => {
+
+            // Dispose the Vue watcher before setting a value.
+            // This is to prevent infinite recursion
+            vueDisposer[observable]()
+
+            // Update Vue reactive state by reassignment
+            shallowUpdateVue(state, observable, newValue, opts)
+
+            // Create Vue watcher and its disposer
+            vueDisposer[observable] = createVueWatcher[observable]()
           }
 
-          // Set property of shadow state.
+          const computedObserveDisposer = reaction(() => obj[observable], computedHandler)
 
-          // If option opts.raw === true, Vues markRaw() will tag all objects as raw objects
-          // preventing huge reactivity objects from being created (use opts.raw = true)
-          // If option opts.raw is an array of properties, then markRaw()
-          // will be applied only to those object properties
-          if (opts.raw === true || typeof rawMap[observable] !== 'undefined') {
-            // Handle raw
-            if (typeof state[observable] === 'object') {
-              if (Array.isArray(newValue)) {
-                // Handle array
-                state[observable] = newValue.map(el => typeof el === 'object' ? markRaw(fullClone(el)) : fullClone(el))
-              } else {
-                // Handle object
-                state[observable] = markRaw(fullClone(newValue))
-              }
-            } else {
-              // Primitives values are copied by value, no need to markRaw() or clone them
-              state[observable] = newValue
+          return () => {
+            computedObserveDisposer()
+          }
+        }
+        else {
+          // Handle regular primitives, objects & arrays that are not computed
+
+          // Reaction handler will run only on primitives and when
+          // the array/objects are reassigned via = operator, otherwise
+          // the deep changes are handled by deepObserveHandler()
+          const reactionHandler = (newValue, oldValue) => {
+
+            if (oldValue !== newValue) {
+              // Dispose the Vue watcher before setting a value.
+              // This is to prevent infinite recursion
+              vueDisposer[observable]()
+
+              // Dispose MobX observers as well, because
+              // They have to be recreated
+              mobxDisposer[observable]()
+
+              // Set property of shadow state.
+              shallowUpdateVue(state, observable, newValue, opts)
+
+              // Recreate MobX shallow and deep watchers
+              mobxDisposer[observable] = createMobXObserver[observable]()
+              // Recreate Vue watcher and its disposer
+              vueDisposer[observable] = createVueWatcher[observable]()
             }
-          } else {
-            // Full clone the property without marking it raw
-            state[observable] = fullClone(newValue)
           }
 
-          // Create Vue watcher and its disposer
-          if (observable in createWatcher) {
-            watcherDisposer[observable] = createWatcher[observable]()
+          // Create shallow MobX reaction observer
+          const shallowObserveDisposer = reaction(() => obj[observable], reactionHandler)
+
+          // Handle deep object changes in MobX and mirror them into the Vue reactive state
+          // based on those changes. More: https://github.com/mobxjs/mobx-utils#deepobserve
+          // https://github.com/mobxjs/mobx/issues/214
+          const deepObserveHandler = (change, path, root) => {
+            // console.log('change', change, 'path', path, 'root', root)
+
+            // Dispose the Vue watcher before setting a value.
+            // This is to prevent infinite recursion
+            vueDisposer[observable]()
+
+            // Get updated values from MobX and change them in Vue object
+            deepUpdateVue(state, observable, change, path)
+
+            // Recreate Vue watcher and its disposer
+            vueDisposer[observable] = createVueWatcher[observable]()
           }
-        })
+
+          const deepObserveDisposer = deepObserve(obj[observable], deepObserveHandler)
+
+          return () => {
+            // MobX shallow and deep disposers
+            shallowObserveDisposer()
+            deepObserveDisposer()
+          }
+        }
       }
 
       // Create MobX reaction and store the reaction disposer
-      reactionDisposer[observable] = createReaction[observable]()
+      mobxDisposer[observable] = createMobXObserver[observable]()
     }
   }
 
   // Dispose MobX reactions and Vue watchers on
   // scope destruction to prevent memory leaks
   tryOnScopeDispose(() => {
-    for (let observable in reactionDisposer) reactionDisposer[observable]()
-    for (let observable in watcherDisposer) watcherDisposer[observable]()
+    for (let observable in mobxDisposer) mobxDisposer[observable]()
+    for (let observable in vueDisposer) vueDisposer[observable]()
   })
 
   // Attach to the source object
   // if it is not attached already
-  if (opts.attach && !(shadowProp(opts.attach) in obj)) {
-    obj[shadowProp(opts.attach)] = state
+  if (opts.attach && !(shadowAttach in obj)) {
+    obj[shadowAttach] = state
   }
 
   return state

@@ -18,6 +18,7 @@ appPresenter.load()
 
 configure({
   enforceActions: 'never',
+  safeDescriptors: false,
   computedRequiresReaction: false,
   reactionRequiresObservable: false,
   observableRequiresReaction: false,

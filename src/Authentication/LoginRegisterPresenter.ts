@@ -16,21 +16,35 @@ export class LoginRegisterPresenter extends MessagesPresenter {
   @inject(Router) router: Router
 
   email = null
-  password = {
-    test: {
-      rest: 'best'
+  password2 = {
+    alala:1,
+    ba: {
+      sasa: {
+        va: 'hi',
+      },
+      rara: 'la'
     }
   }
+  password = [{
+    test: {
+      rest: {
+        lest: 'best'
+      }
+    },
+    arr: [1,2]
+  },'asdvsdv','abasbd','absbasd']
 
   option = null
 
   observables = {
     email: observable,
     password: observable,
+    password2: observable,
     option: observable,
     reset: action,
     login: action,
     register: action,
+    addObjectProperty: action,
     logOut: action,
     setAuthRepoTest: action,
     awesome: computed,
@@ -61,7 +75,7 @@ export class LoginRegisterPresenter extends MessagesPresenter {
     // console.log('computed', this.email, ' + ',this)
     return this.authenticationRepository.testVariable.map(pm => {
       // console.log('->pm', pm['test1'])
-      return { test1: pm.test1 , sub: pm.sub, test2: pm.test2 + '(oulala)' }
+      return { test1: pm.test1, sub: pm.sub, test2: pm.test2 + '(oulala)' }
     })
   }
 
@@ -69,6 +83,7 @@ export class LoginRegisterPresenter extends MessagesPresenter {
   get viewTest2 () {
     return this.authenticationRepository.testVariable2
   }
+
   //
   set viewTest (value) {
     console.log('this!', this)
@@ -83,11 +98,11 @@ export class LoginRegisterPresenter extends MessagesPresenter {
 
   _awesome = 0
 
-  get awesome() {
+  get awesome () {
     return this._awesome
   }
 
-  set awesome (value){
+  set awesome (value) {
     this._awesome = value
   }
 
@@ -97,7 +112,8 @@ export class LoginRegisterPresenter extends MessagesPresenter {
     this.authenticationRepository.testVariable[0].sub.test = 'aaaaaaaaaaa';
     this.authenticationRepository.testVariable[0].sub.rest = 'aaaaaaaaaaa';
 
-    notify(this.authenticationRepository, 'testVariable', 0)
+    this.authenticationRepository.testVariable[0]
+      = notify(this.authenticationRepository.testVariable[0])
   }
 
   setInjectableObservableSubProperties () {
@@ -105,22 +121,56 @@ export class LoginRegisterPresenter extends MessagesPresenter {
     this.authenticationRepository.testVariable2.awesome.super = 'test'
     this.authenticationRepository.testVariable2.awesome.duper = 'test'
 
-    notify(this.authenticationRepository, 'testVariable2')
+    this.authenticationRepository.testVariable2
+      = notify(this.authenticationRepository.testVariable2)
   }
 
   setObjectSubProperty () {
-    this.password.test.rest = 2
+    delete this.password[0].test.rest.lest
+  }
 
-    notify(this, 'password')
+  addObjectSubProperty () {
+    this.password[0].test.bla = true
+  }
+  addObjectProperty () {
+    this.password2.test= true
+    this.password2.test2= true
+    this.password2.test2= true
+  }
+
+  deleteSubObjectProperty () {
+    delete this.password2.ba.sasa
+  }
+
+  setSpliceArrayProperty () {
+    this.password.splice(1, 1, 'test')
+  }
+
+  setSubProperty() {
+    this.password2.alala = 2
+  }
+
+  setProperty() {
+    this.password2 = { haha: true}
+    console.log('this.password2', this.password2)
+  }
+
+  setPushArrayItem () {
+    this.password.push('testing push')
+  }
+
+  setPushSubObjectArrayItem () {
+    // this.password[0].arr.splice(this.password[0].arr.length, 0, ['array', 'list'])
+    this.password[0].arr.push(['array', 'list'])
   }
 
   setViewTestViaMethod () {
-    this.viewTest = [{test1:'aloha', sub:{test:'mmmmmm'}}]
+    this.viewTest = [{ test1: 'aloha', sub: { test: 'mmmmmm' } }]
   }
 
   reset () {
     this.email = ''
-    this.password = ''
+    // this.password = ''
     this.option = 'login'
   }
 
@@ -156,6 +206,10 @@ export class LoginRegisterPresenter extends MessagesPresenter {
     this.messagesRepository.clientMessages = clientValidationMessages
 
     return clientValidationMessages.length === 0
+  }
+
+  #testFunct(){
+
   }
 
 }

@@ -6,10 +6,12 @@ import MessagesComponent from '../Core/Messages/MessagesComponent.vue'
 // import { useValidation } from '../Core/Providers/Validation'
 import { container } from '../AppIOC'
 import { AuthenticationRepository } from "@/Authentication/AuthenticationRepository.js";
+import { reactive } from "vue";
 
 
 const presenter: LoginRegisterPresenter = container.get(LoginRegisterPresenter);
 const vm: LoginRegisterPresenter = presenter.vm
+
 console.log('presenter', presenter)
 console.log('vm', vm)
 // const vm: LoginRegisterPresenter = presenter.getVm();
@@ -20,11 +22,18 @@ const auth = container.get(AuthenticationRepository);
 //   vm.awesome = i++
 // }, 500)
 // vm.awesome = 'test'
+console.log(' vm.password',  vm.password)
+// setInterval(() => vm.password.push('aaa'), 1000);
+const a = reactive(['test','test2'])
+console.log('a', a)
+// setInterval(() => a.push('aaa'), 1000);
+setTimeout(() => presenter.addObjectProperty(), 1000);
 </script>
 <template>
 
   <vue-dd name="presenter" :get-all-properties="true" v-model="presenter" />
   <vue-dd name="vm" :get-all-properties="true" v-model="vm" />
+<!--  <vue-dd name="a" v-model="a" />-->
 
   <div class="container">
     <div class="login-register">
@@ -68,11 +77,25 @@ const auth = container.get(AuthenticationRepository);
     <button @click="() => { vm.setAuthRepoTest() }">Set value push</button>
     <button @click="() => { vm.setAuthRepoArrayKey() }">Set array key & notify</button> <br />
     <button @click="() => { vm.setInjectableObservableSubProperties() }">Set injectable authenticationRepository object properties</button>
-    <button @click="() => { vm.viewTest[0].sub.test = 1 }">Set value 5</button>
+    <button @click="() => { vm.viewTest[0].sub.test = 1 }">Set value sub test</button>
     <button @click="() => { vm.setObjectSubProperty() }">Set password object sub property</button>
+    <button @click="() => { vm.setSpliceArrayProperty() }">Set password splice array prop</button>
+    <button @click="() => { vm.setPushArrayItem() }">Set password push array value</button>
     <button @click="() => { presenter.email = 'eka@eka.ca' }">Set presenter email</button>
     <button @click="() => { vm.setViewTestViaMethod() }">Set viewTest via a method</button>
+    <button @click="() => { vm.setPushSubObjectArrayItem() }">Set password setPushSubObjectArrayItem</button>
+    <button @click="() => { vm.addObjectSubProperty() }">Set password addObjectSubProperty</button>
+    <button @click="() => { vm.addObjectProperty() }">Set password addObjectProperty</button>
+    <button @click="() => { vm.deleteSubObjectProperty() }">Delete password deleteSubObjectProperty</button>
+    <button @click="() => { vm.setSubProperty() }">Set password setSubProperty</button>
+    <button @click="() => { vm.setProperty() }">Set password setProperty</button>
 
+   <div v-for="(data, index) in vm.password" :key="index">
+     {{ data }}
+   </div>
+    <div v-if="vm.password[5]">
+      {{vm.password[5]}}
+    </div>
     <br />
     <br />
     <button @click="() => { presenter.email = 'test' }">Set Presenter email</button>

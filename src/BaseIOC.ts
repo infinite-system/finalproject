@@ -19,7 +19,7 @@ export class BaseIOC {
   buildBaseTemplate = () => {
 
     this.container.bind(MessagesRepository).to(MessagesRepository).inSingletonScope()
-    // this.container.bind(Router).to(Router).inSingletonScope()
+    this.container.bind(Router).to(Router).inSingletonScope()
     this.container.bind(RouterRepository).to(RouterRepository).inSingletonScope()
     this.container.bind(NavigationRepository).to(NavigationRepository).inSingletonScope()
     this.container.bind(UserModel).to(UserModel).inSingletonScope()
