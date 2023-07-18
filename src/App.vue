@@ -2,12 +2,6 @@
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
 import { injectable } from "inversify";
-
-@injectable()
-class Test {
-
-}
-new Test()
 </script>
 
 <template>
